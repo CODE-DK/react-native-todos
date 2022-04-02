@@ -1,6 +1,10 @@
 {
   "extends": "expo/tsconfig.base",
+  "compileOnSave": true,
   "compilerOptions": {
-    "strict": true
+    "strict": true,
+    "outDir": "build",
+    "alwaysStrict": true,
+    "pretty": true
   }
 }
