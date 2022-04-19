@@ -1,9 +1,12 @@
-import {ScrollView, StyleSheet, View} from 'react-native';
-import Navbar from "./src/components/Navbar";
-import AddTodo from "./src/components/AddTodo";
-import {ITodo} from "./src/data/models";
+import {Alert, StyleSheet, View} from 'react-native';
+import {ITodo} from "./src/models";
 import React, {useState} from "react";
-import Todo from "./src/components/Todo";
+
+import {Navbar} from "./src/components/Navbar";
+import {MainScreen} from "./src/screens/MainScreen";
+import {TodoScreen} from "./src/screens/TodoScreen";
+
+import {useFonts} from 'expo-font';
 
 const styles = StyleSheet.create({
     container: {
@@ -12,43 +15,79 @@ const styles = StyleSheet.create({
     },
 });
 
-const DEFAULT_TITLE = "you todo list"
-
 export default function App() {
-    const [todos, setTodos] = useState<ITodo[]>([
-        {id: "1", title: "купить хлеб"},
-        {id: "2", title: "купить молоко"},
-        {id: "3", title: "купить сосиськи"},
-        {id: "4", title: "купить ежа"},
-        {id: "5", title: "купить матрешку"},
-        {id: "6", title: "купить и продать"},
-        {id: "7", title: "купить что нибудь не нужное"},
-        {id: "8", title: "купить что нибудь нужное"},
-        {id: "9", title: "купить что нибудь нужное"},
-        {id: "10", title: "продать что нибудь не нужное"},
-        {id: "11", title: "продать что нибудь нужное"},
-        {id: "12", title: "занять денег и не отдавать"},
-        {id: "13", title: "отдать то, что никогда не занимал"},
-        {id: "14", title: "поспать и проснуться"},
-        {id: "15", title: "расчесать ежа"},
-    ]);
+    const [todoId, setTodoId] = useState<string | null>(null);
+    const [todos, setTodos] = useState<ITodo[]>([]);
 
     const addTodo = (title: string) => {
         const newTodo: ITodo = {
             id: Date.now().toString(),
             title: title
         }
-        setTodos((todoList: ITodo[]) => [...todoList, newTodo]);
+        setTodos(prevState => [
+            ...prevState,
+            newTodo
+        ])
+    }
+    const updateTodo = (id: string, title: string) => {
+        setTodos(prevState => prevState.map(it => {
+            if (it.id === id) {
+                it.title = title
+            }
+            return it
+        }))
+    }
+    const removeTodo = (id: string) => {
+        const showAlert = () => {
+            Alert.alert(
+                "Удаление",
+                "Вы не сможете вернуть заметку",
+                [
+                    {
+                        text: "Отмена",
+                        style: "cancel"
+                    },
+                    {
+                        text: "Удалить",
+                        style: "destructive",
+                        onPress: () => {
+                            setTodoId(null)
+                            setTodos(prevState => prevState.filter(todo => todo.id !== id))
+                        },
+                    }
+                ],
+                {
+                    cancelable: false
+                }
+            );
+        }
+        showAlert()
+    }
+    let screen = (<MainScreen addTodo={addTodo}
+                              removeTodo={removeTodo}
+                              openTodo={(id: string) => setTodoId(id)}
+                              todos={todos}/>);
+    if (todoId) {
+        screen = (<TodoScreen todo={todos.filter(someTodo => someTodo.id === todoId)[0]}
+                              goBack={() => setTodoId(null)}
+                              onSave={updateTodo}
+                              removeTodo={removeTodo}/>);
+    }
+
+    const [isLoaded] = useFonts({
+        "Roboto-Bold": require('./assets/fonts/Roboto-Bold.ttf'),
+        "Roboto-Regular": require('./assets/fonts/Roboto-Regular.ttf'),
+    });
+
+    if (!isLoaded) {
+        return null;
     }
 
     return (
         <View>
-            <Navbar title={DEFAULT_TITLE}/>
+            <Navbar title={"You todos"}/>
             <View style={styles.container}>
-                <AddTodo onSubmit={addTodo}/>
-                <ScrollView>
-                    {todos.map((todo) => (<Todo todo={todo} key={todo.id}/>))}
-                </ScrollView>
+                {screen}
             </View>
         </View>
     );

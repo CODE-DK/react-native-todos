@@ -1,7 +1,11 @@
 import React, {FC, useState} from 'react';
-import {Alert, Button, StyleSheet, TextInput, View} from "react-native";
+import {Alert, Button, StyleSheet, TextInput, View, ViewStyle} from "react-native";
+import {THEME} from "../theme";
 
-const styles = StyleSheet.create({
+const styles = StyleSheet.create<{
+    block: ViewStyle,
+    input: ViewStyle
+}>({
         block: {
             flexDirection: "row",
             justifyContent: "space-between",
@@ -13,7 +17,7 @@ const styles = StyleSheet.create({
             padding: 8,
             borderStyle: "solid",
             borderBottomWidth: 1,
-            borderBottomColor: "dodgerblue"
+            borderBottomColor: THEME.PRIMARY_COLOR
         }
     }
 );
@@ -22,7 +26,7 @@ interface AddProps {
     onSubmit: (title: string) => void
 }
 
-const AddTodo: FC<AddProps> = ({onSubmit}: AddProps) => {
+export const AddTodo: FC<AddProps> = ({onSubmit}: AddProps) => {
     const [value, setValue] = useState<string>("")
 
     const pressHandler = () => {
@@ -36,16 +40,19 @@ const AddTodo: FC<AddProps> = ({onSubmit}: AddProps) => {
 
     return (
         <View style={styles.block}>
-            <TextInput style={styles.input}
-                       onChangeText={text => setValue(text)}
-                       value={value}
-                       placeholder={"Новая заметка..."}
-                       autoCorrect={true}
+            <TextInput
+                style={styles.input}
+                onChangeText={text => setValue(text)}
+                value={value}
+                placeholder={"Новая заметка..."}
+                autoCorrect={true}
+                autoCapitalize={"none"}
             />
-            <Button onPress={pressHandler} title={"Добавить"}/>
+            <Button
+                onPress={pressHandler}
+                title={"Добавить"}
+            />
         </View>
     );
 
 };
-
-export default AddTodo;
